@@ -1,11 +1,14 @@
 const selenium = require("selenium-webdriver");
 const By = selenium.By;
 
+const HomePage = require ('./pages/home');
+
 const driver = new selenium.Builder()
   .forBrowser("chrome")
   .build();
 
-driver.get(process.env.URL);
+const homePage = new HomePage(driver);
+homePage.open();
 
 const invitees = [
    'Gonzalo Torres del Fierro',
@@ -34,29 +37,7 @@ const invitees = [
    'Brent Suggs'
 ];
 
-const locators = {
-  inviteeForm: By.id("registrar"),
-  inviteeNameField: By.css("#registrar input[name='name']"),
-  toggleNonReponsdersVisibility: By.css(".main > div input"),
-  removeButtonForInvitee: invitee => By.xpath(`//span[text()="${invitee}"]/../button[2]`)
-};
-
-function addInvitee(name) {
-  driver.findElement(locators.inviteeNameField)
-    .sendKeys(name);
-  driver.findElement(locators.inviteeForm).submit();
-}
-
-function toggleNonReponsdersVisibility() {
-  driver.findElement(locators.toggleNonReponsdersVisibility)
-    .click();
-}
-
-function removeInvitee(invitee) {
-  driver.findElement(locators.removeButtonForInvitee(invitee))
-    .click();
-}
-
-invitees.forEach(addInvitee);
-// removeInvitee("Shadd Anderson");
-// getting weird promise error here, others experiencing it too
+invitees.forEach(homePage.addInvitee, homePage);
+homePage.removeInvitee('Shadd Anderson');
+homePage.toggleNonReponsdersVisibility();
+// still getting UnhandledPromiseRejection, NoSuchElementError but devtools is grabbing the element
